@@ -9,6 +9,10 @@ verify_ssl = true
 flask = "*"
 flask-cors = "*"
 plotly = "*"
+gunicorn = "*"
+flask-sqlalchemy = "*"
+pandas = "*"
+psycopg2 = "*"
 
 [requires]
 python_version = "3.8"
