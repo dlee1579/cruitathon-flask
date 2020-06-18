@@ -5,12 +5,13 @@ import pandas as pd
 import json
 from ast import literal_eval
 from graph import *
+from os import environ
 
 app = Flask("__main__")
 CORS(app)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-uri_db = "postgres+psycopg2://vjlpuguktrkyxc:75f49540a175bf9ffc0b5c6172cd3303d035f5c93c92e7256c9201ce4cf9a303@ec2-34-235-108-68.compute-1.amazonaws.com:5432/dd3fi28k9rhe31"
-app.config['SQLALCHEMY_DATABASE_URI'] = uri_db
+# uri_db = "postgres+psycopg2://vjlpuguktrkyxc:75f49540a175bf9ffc0b5c6172cd3303d035f5c93c92e7256c9201ce4cf9a303@ec2-34-235-108-68.compute-1.amazonaws.com:5432/dd3fi28k9rhe31"
+app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('URI_DB')
 
 db = SQLAlchemy(app)
 
