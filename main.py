@@ -6,6 +6,7 @@ import json
 from ast import literal_eval
 from graph import *
 from os import environ
+import datetime
 
 app = Flask("__main__")
 CORS(app)
@@ -42,6 +43,14 @@ class Offers(db.Model):
     offer_id = db.Column(db.Integer, primary_key=True)
     player_id = db.Column(db.Integer)
     offer = db.Column(db.String)
+
+class User_Comments(db.Model):
+    __tablename__ = "User_Comments"
+    comment_id = db.Column(db.Integer, primary_key=True)
+    comment_user = db.Column(db.String)
+    team = db.Column(db.String)
+    text = db.Column(db.String)
+    date = db.Column(db.DateTime, default=datetime.datetime.utcnow)
 
 with open("Colors.json") as json_file:
     colors = json.load(json_file)
@@ -88,6 +97,14 @@ def team(team_selected):
     "team_state_stats": literal_eval(state_dist_plot(state_dist)),
     "team_competition_stats": literal_eval(competition_plot(comp_dist))
     }
+
+@app.route('/submit?team=<team>&text=<text>', methods=["GET"])
+def submit_comment(team, text):
+    comment = User_Comments(comment_user="test user", team=team, text=text)
+    db.session.add(comment)
+    db.session.commit()
+    return "submitting comment to database"
+
 
 if __name__ == "__main__":
     # print([r[0] for r in db.session.query(Teams.team).all()])
