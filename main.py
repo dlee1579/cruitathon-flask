@@ -12,7 +12,6 @@ app = Flask("__main__")
 CORS(app)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('URI_DB')
-
 db = SQLAlchemy(app)
 
 class Teams(db.Model):
@@ -103,7 +102,10 @@ def submit_comment(team, text):
     comment = User_Comments(comment_user="test user", team=team, text=text)
     db.session.add(comment)
     db.session.commit()
-    return db.session.query(User_Comments.comment_id, User_Comments.comment_user, User_Comments.team, User_Comments.text, User_Comments.time_submitted).filter(User_Comments.team == team).all()
+    comments_dict = {}
+    comments_query = db.session.query(User_Comments.comment_id, User_Comments.comment_user, User_Comments.team, User_Comments.text, User_Comments.time_submitted).filter(User_Comments.team == team).all()
+
+    return jsonify([{"comment_id": u.comment_id, "comment_user": u.comment_user, "team":u.team, "text": u.text, "time_submitted": u.time_submitted} for u in comments_query])
 
 
 if __name__ == "__main__":
