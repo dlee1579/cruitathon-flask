@@ -103,7 +103,7 @@ def submit_comment(team, text):
     comment = User_Comments(comment_user="test user", team=team, text=text)
     db.session.add(comment)
     db.session.commit()
-    return "submitting comment to database"
+    return db.session.query(User_Comments.comment_id, User_Comments.comment_user, User_Comments.team, User_Comments.text, User_Comments.time_submitted).filter(User_Comments.team == team)
 
 
 if __name__ == "__main__":
