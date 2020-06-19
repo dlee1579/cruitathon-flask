@@ -98,7 +98,7 @@ def team(team_selected):
     "team_competition_stats": literal_eval(competition_plot(comp_dist))
     }
 
-@app.route('/submit?team=<team>&text=<text>', methods=["GET"])
+@app.route('/submit/team=<team>/text=<text>', methods=["GET"])
 def submit_comment(team, text):
     comment = User_Comments(comment_user="test user", team=team, text=text)
     db.session.add(comment)
