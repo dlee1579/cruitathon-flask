@@ -50,7 +50,7 @@ class User_Comments(db.Model):
     comment_user = db.Column(db.String)
     team = db.Column(db.String)
     text = db.Column(db.String)
-    date = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    time_submitted = db.Column(db.DateTime, default=datetime.datetime.utcnow)
 
 with open("Colors.json") as json_file:
     colors = json.load(json_file)
