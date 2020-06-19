@@ -87,6 +87,8 @@ def team(team_selected):
     '''
     comp_dist = pd.read_sql_query(competition_query.format(team_selected), db.engine)
 
+    comments_query = db.session.query(User_Comments.comment_id, User_Comments.comment_user, User_Comments.team, User_Comments.text, User_Comments.time_submitted).filter(User_Comments.team == team).all()
+
     return {"team_aggregate_stats": {"team" : team_selected,
     "commit_count": commit_count,
     "avg_score": avg_score,
@@ -94,7 +96,8 @@ def team(team_selected):
     "color_secondary": colors[team_selected]["colors"][1]},
     "team_position_stats": literal_eval(pos_dist_plot(pos_dist)),
     "team_state_stats": literal_eval(state_dist_plot(state_dist)),
-    "team_competition_stats": literal_eval(competition_plot(comp_dist))
+    "team_competition_stats": literal_eval(competition_plot(comp_dist)),
+    "comments_list": jsonify([{"comment_id": u.comment_id, "comment_user": u.comment_user, "team":u.team, "text": u.text, "time_submitted": u.time_submitted} for u in comments_query]
     }
 
 @app.route('/submit/team=<team>/text=<text>', methods=["GET"])
@@ -102,7 +105,6 @@ def submit_comment(team, text):
     comment = User_Comments(comment_user="test user", team=team, text=text)
     db.session.add(comment)
     db.session.commit()
-    comments_dict = {}
     comments_query = db.session.query(User_Comments.comment_id, User_Comments.comment_user, User_Comments.team, User_Comments.text, User_Comments.time_submitted).filter(User_Comments.team == team).all()
 
     return jsonify([{"comment_id": u.comment_id, "comment_user": u.comment_user, "team":u.team, "text": u.text, "time_submitted": u.time_submitted} for u in comments_query])
