@@ -87,9 +87,11 @@ def team(team_selected):
     '''
     comp_dist = pd.read_sql_query(competition_query.format(team_selected), db.engine)
 
-    comments_query = db.session.query(User_Comments.comment_id, User_Comments.comment_user, User_Comments.team, User_Comments.text, User_Comments.time_submitted).filter(User_Comments.team == team).all()
+    comments_query = db.session.query(User_Comments.comment_id, User_Comments.comment_user, User_Comments.team, User_Comments.text, User_Comments.time_submitted).filter(User_Comments.team == team_selected).all()
+    comments_json = [{"comment_id": u.comment_id, "comment_user": u.comment_user, "team":u.team, "text": u.text, "time_submitted": u.time_submitted} for u in comments_query]
 
-    return {"team_aggregate_stats": {"team" : team_selected,
+    return {
+    "team_aggregate_stats": {"team" : team_selected,
     "commit_count": commit_count,
     "avg_score": avg_score,
     "color_primary": colors[team_selected]["colors"][0],
@@ -97,7 +99,7 @@ def team(team_selected):
     "team_position_stats": literal_eval(pos_dist_plot(pos_dist)),
     "team_state_stats": literal_eval(state_dist_plot(state_dist)),
     "team_competition_stats": literal_eval(competition_plot(comp_dist)),
-    "comments_list": jsonify([{"comment_id": u.comment_id, "comment_user": u.comment_user, "team":u.team, "text": u.text, "time_submitted": u.time_submitted} for u in comments_query]
+    "comments_list": comments_json
     }
 
 @app.route('/submit/team=<team>/text=<text>', methods=["GET"])
