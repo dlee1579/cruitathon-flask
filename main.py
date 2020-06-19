@@ -102,16 +102,26 @@ def team(team_selected):
     "comments_list": comments_json
     }
 
-@app.route('/submit/team=<team>/text=<text>', methods=["GET"])
-def submit_comment(team, text):
+# @app.route('/submit/team=<team>/text=<text>', methods=["GET"])
+# def submit_comment(team, text):
+#     comment = User_Comments(comment_user="test user", team=team, text=text)
+#     db.session.add(comment)
+#     db.session.commit()
+#     comments_query = db.session.query(User_Comments.comment_id, User_Comments.comment_user, User_Comments.team, User_Comments.text, User_Comments.time_submitted).filter(User_Comments.team == team).all()
+
+#     return jsonify([{"comment_id": u.comment_id, "comment_user": u.comment_user, "team":u.team, "text": u.text, "time_submitted": u.time_submitted} for u in comments_query])
+
+@app.route('/submit', methods=['POST'])
+def submit_comment():
+    team = request.json['team']['team']
+    text = request.json['text']['text']
     comment = User_Comments(comment_user="test user", team=team, text=text)
     db.session.add(comment)
     db.session.commit()
-    comments_query = db.session.query(User_Comments.comment_id, User_Comments.comment_user, User_Comments.team, User_Comments.text, User_Comments.time_submitted).filter(User_Comments.team == team).all()
 
+    comments_query = db.session.query(User_Comments.comment_id, User_Comments.comment_user, User_Comments.team, User_Comments.text, User_Comments.time_submitted).filter(User_Comments.team == team).all()
     return jsonify([{"comment_id": u.comment_id, "comment_user": u.comment_user, "team":u.team, "text": u.text, "time_submitted": u.time_submitted} for u in comments_query])
 
 
 if __name__ == "__main__":
-    # print([r[0] for r in db.session.query(Teams.team).all()])
     app.run(debug=True)
