@@ -56,9 +56,10 @@ with open("Colors.json") as json_file:
 
 @app.route('/')
 def home():
-    teams = db.session.query(Teams.team, Teams.conference).all()
-    print('called from React')
-    return jsonify([{"team": r[0], "conference": r[1]} for r in teams])
+    # teams = db.session.query(Teams.team, Teams.conference).all()
+    # print('called from React')
+    # return jsonify([{"team": r[0], "conference": r[1]} for r in teams])
+    return {"message": "Cruitathon Home Page"}
 
 @app.route("/team/<team_selected>", methods=["GET"])
 def team(team_selected):
