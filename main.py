@@ -76,6 +76,11 @@ def team(team_selected, year):
     pos_dist = recruits_df.groupby(by="position").count().reset_index().sort_values("player_id", ascending=False)[["position", "player_id"]]
     state_dist = recruits_df.groupby(by="state").count().reset_index().sort_values("player_id")[["state", "player_id"]]
 
+    if year == "all":
+        year_statement = ""
+    else:
+        year_statement = "and r.recruiting_year = {}".format(year)
+
     competition_query = '''
     select team, offer, count(offer) as offer_count from 
     (
@@ -83,13 +88,13 @@ def team(team_selected, year):
     join "Recruits" r on o.player_id =r.player_id
     where team = '{}'
     and team <> offer
-    and r.recruiting_year = {}
+    {}
     ) t
     group by team, offer
     order by offer_count desc
     limit 8
     '''
-    comp_dist = pd.read_sql_query(competition_query.format(team_selected,2020), db.engine)
+    comp_dist = pd.read_sql_query(competition_query.format(team_selected,year_statement), db.engine)
 
     comments_query = db.session.query(User_Comments.comment_id, User_Comments.comment_user, User_Comments.team, User_Comments.text, User_Comments.time_submitted).filter(User_Comments.team == team_selected).all()
     comments_json = [{"comment_id": u.comment_id, "comment_user": u.comment_user, "team":u.team, "text": u.text, "time_submitted": u.time_submitted} for u in comments_query]
