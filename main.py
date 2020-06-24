@@ -65,7 +65,13 @@ def home():
 
 @app.route("/team/<team_selected>/<year>", methods=["GET"])
 def team(team_selected, year):
-    recruits = db.session.query(Recruits.player_id, Recruits.name, Recruits.state, Recruits.position, Recruits.score).filter(Recruits.team == team_selected).filter(Recruits.recruiting_year == year)
+    if year == "all":
+        recruits = db.session.query(Recruits.player_id, Recruits.name, Recruits.state, Recruits.position, Recruits.score).filter(Recruits.team == team_selected)
+        year_statement = ""
+    else:
+        recruits = db.session.query(Recruits.player_id, Recruits.name, Recruits.state, Recruits.position, Recruits.score).filter(Recruits.team == team_selected).filter(Recruits.recruiting_year == year)
+        year_statement = "and r.recruiting_year = {}".format(year)
+
 
     recruits_df = pd.read_sql(recruits.statement, db.engine)
     commit_count = int(recruits_df.name.count())
@@ -75,11 +81,6 @@ def team(team_selected, year):
 
     pos_dist = recruits_df.groupby(by="position").count().reset_index().sort_values("player_id", ascending=False)[["position", "player_id"]]
     state_dist = recruits_df.groupby(by="state").count().reset_index().sort_values("player_id")[["state", "player_id"]]
-
-    if year == "all":
-        year_statement = ""
-    else:
-        year_statement = "and r.recruiting_year = {}".format(year)
 
     competition_query = '''
     select team, offer, count(offer) as offer_count from 
