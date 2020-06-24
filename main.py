@@ -36,12 +36,14 @@ class Recruits(db.Model):
     score = db.Column(db.Numeric)
     hometown = db.Column(db.String)
     state = db.Column(db.String)
+    recruiting_year = db.Column(db.Integer)
 
 class Offers(db.Model):
     __tablename__ = "Offers"
     offer_id = db.Column(db.Integer, primary_key=True)
     player_id = db.Column(db.Integer)
     offer = db.Column(db.String)
+    recruiting_year = db.Column(db.Integer)
 
 class User_Comments(db.Model):
     __tablename__ = "User_Comments"
@@ -61,9 +63,9 @@ def home():
     # return jsonify([{"team": r[0], "conference": r[1]} for r in teams])
     return {"message": "Cruitathon Home Page"}
 
-@app.route("/team/<team_selected>", methods=["GET"])
-def team(team_selected):
-    recruits = db.session.query(Recruits.player_id, Recruits.name, Recruits.state, Recruits.position, Recruits.score).filter(Recruits.team == team_selected)
+@app.route("/team/<team_selected>/<year>", methods=["GET"])
+def team(team_selected, year):
+    recruits = db.session.query(Recruits.player_id, Recruits.name, Recruits.state, Recruits.position, Recruits.score).filter(Recruits.team == team_selected).filter(Recruits.recruiting_year == year)
 
     recruits_df = pd.read_sql(recruits.statement, db.engine)
     commit_count = int(recruits_df.name.count())
@@ -81,12 +83,13 @@ def team(team_selected):
     join "Recruits" r on o.player_id =r.player_id
     where team = '{}'
     and team <> offer
+    and r.recruiting_year = {}
     ) t
     group by team, offer
     order by offer_count desc
     limit 8
     '''
-    comp_dist = pd.read_sql_query(competition_query.format(team_selected), db.engine)
+    comp_dist = pd.read_sql_query(competition_query.format(team_selected,2020), db.engine)
 
     comments_query = db.session.query(User_Comments.comment_id, User_Comments.comment_user, User_Comments.team, User_Comments.text, User_Comments.time_submitted).filter(User_Comments.team == team_selected).all()
     comments_json = [{"comment_id": u.comment_id, "comment_user": u.comment_user, "team":u.team, "text": u.text, "time_submitted": u.time_submitted} for u in comments_query]
