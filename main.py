@@ -12,6 +12,7 @@ app = Flask("__main__")
 CORS(app)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('URI_DB')
+
 db = SQLAlchemy(app)
 
 class Teams(db.Model):
@@ -53,6 +54,15 @@ class User_Comments(db.Model):
     text = db.Column(db.String)
     time_submitted = db.Column(db.DateTime, default=datetime.datetime.utcnow)
 
+class Hometowns(db.Model):
+    __tablename__ = "Hometowns"
+    hometown_id = db.Column(db.Integer, primary_key=True)
+    hometown = db.Column(db.String)
+    location = db.Column(db.String)
+    latitude = db.Column(db.Numeric)
+    longitude = db.Column(db.Numeric)
+
+
 with open("Colors.json") as json_file:
     colors = json.load(json_file)
 
@@ -81,6 +91,17 @@ def team(team_selected, year):
 
     pos_dist = recruits_df.groupby(by="position").count().reset_index().sort_values("player_id", ascending=False)[["position", "player_id"]]
     state_dist = recruits_df.groupby(by="state").count().reset_index().sort_values("player_id")[["state", "player_id"]]
+    
+    location_query = '''
+    select h.hometown, h_count, latitude, longitude from "Hometowns" h
+    join (
+    select hometown, count(hometown) as h_count from "Recruits" r
+    where team = '{}'
+    {}
+    group by hometown
+    ) t on h.hometown = t.hometown
+    order by h_count desc
+    '''
 
     competition_query = '''
     select team, offer, count(offer) as offer_count from 
@@ -96,9 +117,12 @@ def team(team_selected, year):
     limit 8
     '''
     comp_dist = pd.read_sql_query(competition_query.format(team_selected,year_statement), db.engine)
+    location_json = pd.read_sql_query(location_query.format(team_selected, year_statement), db.engine).to_json(orient="records")
 
     comments_query = db.session.query(User_Comments.comment_id, User_Comments.comment_user, User_Comments.team, User_Comments.text, User_Comments.time_submitted).filter(User_Comments.team == team_selected).all()
     comments_json = [{"comment_id": u.comment_id, "comment_user": u.comment_user, "team":u.team, "text": u.text, "time_submitted": u.time_submitted} for u in comments_query]
+
+    print(location_json)
 
     return {
     "team_aggregate_stats": {"team" : team_selected,
@@ -109,7 +133,8 @@ def team(team_selected, year):
     "team_position_stats": literal_eval(pos_dist_plot(pos_dist)),
     "team_state_stats": literal_eval(state_dist_plot(state_dist)),
     "team_competition_stats": literal_eval(competition_plot(comp_dist)),
-    "comments_list": comments_json
+    "comments_list": comments_json,
+    "location_json": literal_eval(location_json)
     }
 
 # @app.route('/submit/team=<team>/text=<text>', methods=["GET"])
