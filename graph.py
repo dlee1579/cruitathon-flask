@@ -34,3 +34,25 @@ def competition_plot(comp_dist):
     ]
     graphJSON = json.dumps(data, cls=plotly.utils.PlotlyJSONEncoder)
     return graphJSON
+
+def hometown_plot(hometown_dist):
+    data = [
+        go.Scattergeo(
+            locationmode= 'USA-states',
+            lat= hometown_dist['latitude'],
+            lon= hometown_dist['longitude'],
+            hoverinfo= 'text',
+            text= hometown_dist['hometown'],
+            marker = go.scattergeo.Marker(size=hometown_dist['h_count'])
+            # size=hometown_dist['h_count']
+            # marker: {
+            #     size: hometown_dist['h_count'],
+            #     line: {
+            #         color: 'black',
+            #         width: 2
+            #     },
+            # }
+        )
+    ]
+    graphJSON = json.dumps(data, cls=plotly.utils.PlotlyJSONEncoder)
+    return graphJSON
